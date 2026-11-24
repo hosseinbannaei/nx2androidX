@@ -1,0 +1,9 @@
+# Gal Guardians: Demon Purge on Android (keys in docs/ARCHITECTURE.md "Game profiles on Android")
+# Inti Creates "Ice" engine on NVN, SDK 14.3.0, update 1.1.0 (v262144); modules main + subsdk0 (movie) + subsdk1 (GLSLC) + sdk.
+# The game compiles 7 GLSL shaders at startup with GLSLC (subsdk1): runtime GLSLC capture on device (porter device_glslc).
+# Initial experimental game profile drafted from binary analysis and survey report.
+status	experimental
+tested	v262144
+package	org.nx2a.galguardians
+orientation	landscape
+graphics	nvn

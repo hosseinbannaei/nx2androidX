@@ -13,7 +13,7 @@ with — the game is not missing on Android.
 
 These have an official Android release too, and are ported here anyway: Unpacking.
 
-**79 / 193 ported**
+**80 / 194 ported**
 
 This file is generated: `python3 docs/gen_tables.py` reads the profiles and writes it. The facts
 in a row are the profile's own — the name and the version from `game.tsv`, the status, the note
@@ -85,6 +85,7 @@ the author of the commit that introduced them.
 - [x] Fire Emblem: Three Houses · `010055D009F78000` · playable · v327680 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) · ported by @shirai91
 - [x] FM24 Touch · `01008B101B87A000` · playable · update 1.0.1 · 60 fps · OpenGL ES · touch or controller · ported by @shirai91
 - [x] Football Manager 26 Touch · `0100D4A023450000` · playable · update 1.0.2 · 30 fps (as on Switch) · played by touch · port with a Turnip Vulkan driver (the crowd glitches on Qualcomm's driver) · ported by @shirai91
+- [x] Gal Guardians: Demon Purge · `0100B5301A180000` · experimental · v262144
 - [x] Graveyard Keeper 2 · `0100005027A18000` · playable · update 1.0.4 · 60 fps (30 on Switch) · ported by @shirai91
 - [ ] Hades · `0100535012974000` · 1.0.38233
 - [x] Hades II · `0100A00019DE0000` · playable · update 1.0 · 60 fps · ported by @shirai91
