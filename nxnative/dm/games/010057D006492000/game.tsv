@@ -26,6 +26,7 @@ zip_store	.awb:.pak:.usm:.metallib
 # ---- Input ----
 # menus and the battle commands take the D-pad
 pad_layout	full
+op_mode	handheld
 
 # ---- Memory ----
 # The NPDM declares no system resource, so there is no virtual address memory: nninitStartup sets a heap of pool − used (3.08 GB) and Unreal runs on it, with no engine address region.
