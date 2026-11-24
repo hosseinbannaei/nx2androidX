@@ -51,8 +51,10 @@ static void used(int64_t d) {
     if (after > peak && after >> 28 != peak >> 28) LOG("[mem] Unreal heap (host malloc zone) up to %.2f GB in use", after / 1073741824.0);
 }
 static size_t align_of(uint32_t a) { return a > 16 ? a : 16; }   // 0 = DEFAULT_ALIGNMENT, 16 bytes as Binned3 gives
+static size_t size_of(size_t n) { return n < 16 ? 16 : n; }   // the host allocator's smallest class is 8-byte aligned (Android's jemalloc): an Unreal block below 16 bytes lands in it, and the engine reads such a block as 16-byte aligned (PhysX: a SIGSEGV in a long play, upstream PR #484)
 static void *alloc(size_t n, uint32_t a) {
-    void *p = align_of(a) == 16 ? malloc_zone_malloc(g_zone, n ? n : 1) : malloc_zone_memalign(g_zone, align_of(a), n ? n : 1);
+    n = size_of(n);   // never below 16 (size_of)
+    void *p = align_of(a) == 16 ? malloc_zone_malloc(g_zone, n) : malloc_zone_memalign(g_zone, align_of(a), n);
     if (p) used((int64_t)malloc_size(p));
     return p;
 }
@@ -60,6 +62,7 @@ static void release(void *p) { if (p) { used(-(int64_t)malloc_size(p)); malloc_z
 static void *realloc_aligned(void *p, size_t n, uint32_t a) {
     if (!p) return alloc(n, a);
     if (!n) { release(p); return NULL; }
+    n = size_of(n);   // a shrink must not move a live block into the tiny class either (size_of)
     size_t old = malloc_size(p);
     if (align_of(a) == 16) { void *q = malloc_zone_realloc(g_zone, p, n); if (q) used((int64_t)malloc_size(q) - (int64_t)old); return q; }
     if (!((uintptr_t)p & (align_of(a) - 1)) && old >= n) return p;
