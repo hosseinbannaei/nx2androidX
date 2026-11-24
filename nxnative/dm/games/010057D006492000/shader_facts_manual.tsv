@@ -1,0 +1,8 @@
+# Answer table overrides for OCTOPATH TRAVELER (010057D006492000)
+# Fix 1D texture buffer fetches erroneously translated as 2D row samplers
+327fce53f1fce4c1	{"tex":{"0":"buffer"}}
+6d87d48e86bd7f3c	{"tex":{"0":"buffer","1":"buffer"}}
+8727ce37b98c0150	{"tex":{"2":"buffer"}}
+8b2179be8b9ad664	{"tex":{"0":"buffer"}}
+d4232803d9e26f99	{"tex":{"4":"buffer"}}
+6d1e0be96e395603	{"tex":{"0":"buffer"}}
