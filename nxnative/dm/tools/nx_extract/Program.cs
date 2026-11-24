@@ -263,7 +263,12 @@ static class P {
     }
 
     // Every meta NCA's data section holds its title's content meta (a CNMT, named *.cnmt), which lists that title's NCAs by content ID: the NCA entry's file name. The merged
-    // container's titles and versions come from these (LibHac's Cnmt parses a CNMT); the ordinary path never reads them
+    // container's titles and versions come from these (LibHac's Cnmt parses a CNMT); the ordinary path never reads them.
+    // LibHac 0.19.0's CnmtContentEntry omits the IdOffset field (byte 23 of each entry, after hash + 16-byte NcaId + 6-byte size + type), so we record it from the raw CNMT bytes.
+    static readonly System.Runtime.CompilerServices.ConditionalWeakTable<CnmtContentEntry, BoxedByte> g_idOffsets = new();
+    sealed class BoxedByte { public byte Value; public BoxedByte(byte v) => Value = v; }
+    static byte IdOffset(this CnmtContentEntry c) => c != null && g_idOffsets.TryGetValue(c, out var b) ? b.Value : (byte)0;
+
     static List<Cnmt> Cnmts(List<NcaEntry> ncas) {
         var metas = new List<Cnmt>();
         foreach (var e in ncas) {
@@ -275,13 +280,18 @@ static class P {
                 fs.OpenFile(ref f.Ref, de.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
                 f.Get.GetSize(out long n).ThrowIfFailure();
                 byte[] v = new byte[n]; f.Get.Read(out _, 0, v, ReadOption.None).ThrowIfFailure();
-                metas.Add(new Cnmt(new MemoryStream(v)));
+                var cnmt = new Cnmt(new MemoryStream(v));
+                metas.Add(cnmt);
+                foreach (var c in cnmt.ContentEntries) {
+                    int idx = v.AsSpan().IndexOf(c.NcaId);
+                    if (idx >= 0 && idx + 23 < v.Length) g_idOffsets.Add(c, new BoxedByte(v[idx + 23]));
+                }
             }
         }
         return metas;
     }
-    // A multi-program title (an update may add a whole second program, e.g. ROMANCE OF THE THREE KINGDOMS 8 REMAKE's 1.1.3, title ID …0001) lists a Program (and Control) entry per index: take the first one (program 0, the game), as Pick takes the lowest title ID on the ordinary path. LibHac 0.19.0's CnmtContentEntry does not carry the index (upstream's newer LibHac has it as IdOffset), but the content entries are in index order, so the first of that type is the game's
-    static CnmtContentEntry EntryOf(Cnmt m, LibHac.Ncm.ContentType t) => m?.ContentEntries.Where(c => c.Type == t).FirstOrDefault();
+    // A multi-program title (an update may add a whole second program, e.g. ROMANCE OF THE THREE KINGDOMS 8 REMAKE's 1.1.3, title ID …0001) lists a Program (and Control) entry per index: take the lowest IdOffset (program 0, the game), as Pick takes the lowest title ID on the ordinary path — the list's order need not start at 0
+    static CnmtContentEntry EntryOf(Cnmt m, LibHac.Ncm.ContentType t) => m?.ContentEntries.Where(c => c.Type == t).OrderBy(c => c.IdOffset()).FirstOrDefault();
 
     // A merged dump ("(1G+1U)"): base game, update and DLC NCAs beside one another in one container. NCA headers cannot pick them: an update's program and control NCAs carry the
     // base game's title ID, so base and update both read …000. The content metas decide: the application CNMT's entries are the base's NCAs, the newest patch CNMT's the update's
